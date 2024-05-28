@@ -3,10 +3,12 @@
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.corpus import wordnet
 
 # Ensure you have the NLTK data required
 nltk.download('punkt')
 nltk.download('stopwords')
+nltk.download('wordnet')
 
 # Define a dictionary of predefined responses
 responses = {
