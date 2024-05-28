@@ -27,19 +27,15 @@ def preprocess(text):
     tokens = [word.lower() for word in tokens]
     # Remove punctuation and non-alphabetic characters
     words = [word for word in tokens if word.isalpha()]
-    # Remove stopwords
-    stop_words = set(stopwords.words('english'))
-    words = [word for word in words if word not in stop_words]
     return ' '.join(words)
 
 # Function to get a response from the chatbot
 def get_response(user_input):
     # Preprocess the user input
     cleaned_input = preprocess(user_input)
-    # Check if the cleaned input is in the predefined responses
-    for key in responses:
-        if key in cleaned_input:
-            return responses[key]
+    # Check if the cleaned input exactly matches any predefined response keys
+    if cleaned_input in responses:
+        return responses[cleaned_input]
     return "I'm sorry, I don't understand that."
 
 # Main function to interact with the chatbot
