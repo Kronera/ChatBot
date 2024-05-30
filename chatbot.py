@@ -4,6 +4,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
+from fuzzywuzzy import fuzz
 
 # Ensure you have the NLTK data required
 nltk.download('punkt')
@@ -31,13 +32,46 @@ def preprocess(text):
     words = [word for word in tokens if word.isalpha()]
     return ' '.join(words)
 
+# Function to find synonyms
+def find_synonyms(word):
+    synonyms = set()
+    for syn in wordnet.synsets(word):
+        for lemma in syn.lemmas():
+            synonyms.add(lemma.name())
+    return synonyms
+
+# Function to generate all possible phrases including synonyms
+def generate_phrases(phrase):
+    words = word_tokenize(phrase)
+    all_phrases = set()
+    for i in range(len(words)):
+        synonyms = find_synonyms(words[i])
+        for synonym in synonyms:
+            new_phrase = words[:i] + [synonym] + words[i+1:]
+            all_phrases.add(' '.join(new_phrase))
+    return all_phrases
+
 # Function to get a response from the chatbot
 def get_response(user_input):
     # Preprocess the user input
     cleaned_input = preprocess(user_input)
-    # Check if the cleaned input exactly matches any predefined response keys
-    if cleaned_input in responses:
-        return responses[cleaned_input]
+    
+    best_match = None
+    best_score = 0
+    
+    for key in responses:
+        all_phrases = generate_phrases(key)
+        all_phrases.add(key)
+        
+        for phrase in all_phrases:
+            score = fuzz.partial_ratio(cleaned_input, phrase)
+            if score > best_score:
+                best_score = score
+                best_match = key
+    
+    if best_score > 60:  # Lower threshold for fuzzy matching
+        return responses[best_match]
+    
     return "I'm sorry, I don't understand that."
 
 # Main function to interact with the chatbot
