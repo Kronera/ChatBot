@@ -15,20 +15,28 @@ nltk.download('wordnet')
 responses = {
     "hello": "Hi there! How can I help you?",
     "hi": "Hello! What can I do for you today?",
-    "how are you": "I'm just a chatbot, but I'm here to help you!",
+    "hey": "Hi there! How can I help you?",
+    "hello there": "Hi there! How can I help you?",
+    "how are you": "I'm doing well, thank you! How can I assist you today?",
+    "how do you do": "I'm just a chatbot, but I'm here to help you!",
+    "how's it going": "I'm doing well, thank you! How can I assist you today?",
     "what is your name": "I'm ChatBot, your virtual assistant.",
-    "bye": "Goodbye! Have a great day!",
+    "who are you": "I'm ChatBot, your virtual assistant.",
+    "tell me your name": "I'm ChatBot, your virtual assistant.",
     "thank you": "You're welcome!",
-    "thanks": "You're welcome!"
+    "thanks": "You're welcome!",
+    "thanks a lot": "You're welcome!",
+    "thank you very much": "You're welcome!",
+    "how can you help me": "I can assist you with general questions. What do you need help with?"
 }
+
+# Add variations of 'bye' to be recognized as a farewell
+farewell_phrases = ["bye", "goodbye", "see you later", "bye bye", "byee", "ciao", "adios"]
 
 # Function to preprocess user input
 def preprocess(text):
-    # Tokenize the text
     tokens = word_tokenize(text)
-    # Convert to lower case
     tokens = [word.lower() for word in tokens]
-    # Remove punctuation and non-alphabetic characters
     words = [word for word in tokens if word.isalpha()]
     return ' '.join(words)
 
@@ -52,10 +60,8 @@ def generate_phrases(phrase):
     return all_phrases
 
 # Function to get a response from the chatbot
-def get_response(user_input):
-    # Preprocess the user input
+def get_response(user_input, context):
     cleaned_input = preprocess(user_input)
-    
     best_match = None
     best_score = 0
     
@@ -68,21 +74,24 @@ def get_response(user_input):
             if score > best_score:
                 best_score = score
                 best_match = key
-    
-    if best_score > 60:  # Lower threshold for fuzzy matching
-        return responses[best_match]
+
+    if best_score > 60:
+        response = responses[best_match]
+        context['last_interaction'] = best_match
+        return response
     
     return "I'm sorry, I don't understand that."
 
 # Main function to interact with the chatbot
 def chat():
     print("ChatBot: Hello! Type 'bye' to exit.")
+    context = {}
     while True:
         user_input = input("You: ")
-        if user_input.lower() == 'bye':
+        if preprocess(user_input) in farewell_phrases:
             print("ChatBot: Goodbye! Have a great day!")
             break
-        response = get_response(user_input)
+        response = get_response(user_input, context)
         print("ChatBot:", response)
 
 # Run the chat function
